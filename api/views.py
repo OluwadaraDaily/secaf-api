@@ -2,7 +2,7 @@
 from django.shortcuts import render
 from django.http import response, JsonResponse
 from django.db.models import Q
-import os
+import os, io
 from google.cloud import vision
 import cloudinary
 import cloudinary.uploader
@@ -20,25 +20,48 @@ cloudinary.config(
 
 # Upload Image
 def uploadImage(request):
+    
     # Make sure it is a POST request
     if request.method == "POST":
+        
         # Try to upload image
         try:
             # Store image received in a variable
             imageData = request.FILES['imageData']
-            
+
             # Upload to cloudinary folder
             res = cloudinary.uploader.upload(imageData, folder="bare-app")
 
-            # Sync with DB
-            image = Photo(name=res['secure_url'], has_face=False)
-            image.save()
+            # Instantiate client
+            client = vision.ImageAnnotatorClient()
+            image = vision.Image()
+
+            # Set the Image URI to the secure URL from Cloudinary
+            image.source.image_uri = res['secure_url']
+
+            # Insatntiate the face detection process
+            response = client.face_detection(image=image)
             
-            # Return response
-            return JsonResponse({
-                "success": "File uploaded"
-            })
-        
+            # Check for a face/faces on the response
+            faces = response.face_annotations
+
+            # If the image has at least a face
+            if len(faces) > 0:
+
+                # Sync with DB
+                image = Photo(name=res['secure_url'], has_face=True)
+                image.save()
+                
+                # Return response
+                return JsonResponse({
+                    "success": "File uploaded",
+                    "faces" : len(faces)
+                })
+            else:
+                # Return an error message
+                return JsonResponse({
+                    "error": "Image does not contain a face or faces"
+                })
         except:
             # Returns an error message if upload was not completed
             return JsonResponse({
@@ -68,7 +91,7 @@ def getImages(request):
         "images" : image_URLs
     })
 
-# Delete Image
+# Delete Image Endpoint
 def deleteImage(request, id):
     if request.method == "DELETE":
         # Get image with ID
@@ -83,3 +106,4 @@ def deleteImage(request, id):
             "message": "Image deleted",
             "id" : id
         })
+    
