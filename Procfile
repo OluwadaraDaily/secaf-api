@@ -1,0 +1,1 @@
+web: gunicorn bare_test_api.wsgi --log-file -
