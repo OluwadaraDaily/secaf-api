@@ -67,6 +67,10 @@ def uploadImage(request):
             return JsonResponse({
                 "error" : "An error occured"
             })
+    
+    return JsonResponse({
+        "page_name" : "uploadPage"
+    })
 
 # Get all Images
 def getImages(request):
