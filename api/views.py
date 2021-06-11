@@ -11,6 +11,7 @@ from bare_test_api.settings import env
 from api.models import Photo
 import asyncio
 
+
 # Configuring Cloudinary
 cloudinary.config(
     cloud_name = env('CLOUDINARY_CLOUD_NAME'),
@@ -46,7 +47,7 @@ def uploadImage(request):
             faces = response.face_annotations
 
             # If the image has at least a face
-            if len(faces) > 0:
+            if len(faces) > 0 :
 
                 # Sync with DB
                 image = Photo(name=res['secure_url'], has_face=True)
