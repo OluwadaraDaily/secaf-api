@@ -144,7 +144,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Setting CORS
 CORS_ALLOWED_ORIGINS = [
-    ""
+    'https://secaf.netlify.app/'
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://secaf.netlify.app/',
 ]
 
 # Static files (CSS, JavaScript, Images)
